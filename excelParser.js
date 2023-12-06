@@ -8,7 +8,6 @@ const privateDataExcelFilePath = 'privateData';
 // Specify the sheet names you want to parse
 const sheetsToParse = ['SalesOrders', 'Sale Financials'];
 
-
 // Read the files in the directory
 fs.readdir(privateDataExcelFilePath, (err, files) => {
   if (err) {
