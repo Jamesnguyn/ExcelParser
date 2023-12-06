@@ -5,6 +5,10 @@ const path = require('path');
 // Specify the directory path
 const privateDataExcelFilePath = 'privateData';
 
+// Specify the sheet names you want to parse
+const sheetsToParse = ['SalesOrders', 'Sale Financials'];
+
+
 // Read the files in the directory
 fs.readdir(privateDataExcelFilePath, (err, files) => {
   if (err) {
@@ -23,12 +27,19 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     const privateDataExcel = XLSX.readFile(excelFilePath);
 
     // Iterate through each sheet
-    privateDataExcel.SheetNames.forEach(sheetName => {
-      // Get the data from the sheet
-      const sheetData = XLSX.utils.sheet_to_json(privateDataExcel.Sheets[sheetName]);
+    sheetsToParse.forEach(sheetName => {
 
-      // Now 'sheetData' contains an array of objects representing the data in the current sheet
-      console.log(`Data from sheet "${sheetName}" in file "${excelFile}":`, sheetData);
+      // Check if sheet exists in workbook
+      if(privateDataExcel.Sheets.hasOwnProperty(sheetName)) {
+        // Get the data from the sheet
+        const sheetData = XLSX.utils.sheet_to_json(privateDataExcel.Sheets[sheetName]);
+
+        // Now 'sheetData' contains an array of objects representing the data in the current sheet
+        console.log(`Data from sheet "${sheetName}" in file "${excelFile}":`, sheetData);
+      }
+      else {
+        console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
+      }
     });
   });
 });
