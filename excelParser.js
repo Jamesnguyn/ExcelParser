@@ -11,17 +11,17 @@ const sheetsToParse = [
   { sheetName: 'sensordata', columns: ['timestamp', 'Display Time'] }
 ];
 
-let sensorDataFirstTimestamp;
-let sensorDataLastTimestamp;
-let lowerBound;
-let upperBound;
-
 // Read the files in the directory
 fs.readdir(privateDataExcelFilePath, (err, files) => {
   if (err) {
     console.error('Error reading directory:', err);
     return;
   }
+
+  let sensorDataFirstTimeStamp;
+  let sensorDataLastTimeStamp;
+  let lowerBound;
+  let upperBound;
 
   // Filter Excel files
   const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx');
@@ -99,14 +99,10 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
         if (sheetName === "sensordata") {
           if (filteredData.length > 0) {
             const timestampValues = filteredData.map(row => row["timestamp"]);
-            sensorDataFirstTimestamp = timestampValues[0];
-            sensorDataLastTimestamp = timestampValues[timestampValues.length - 1];
-            console.log("First TimeStamp: ", sensorDataFirstTimestamp);
-            console.log("Last TimeStamp: ", sensorDataLastTimestamp);
-
-            // You can also print lowerBound and upperBound for debugging
-            console.log("Lower Bound: ", lowerBound);
-            console.log("Upper Bound: ", upperBound);
+            sensorDataFirstTimeStamp = timestampValues[0];
+            sensorDataLastTimeStamp = timestampValues[timestampValues.length - 1];
+            console.log("First TimeStamp: ", sensorDataFirstTimeStamp);
+            console.log("Last TimeStamp: ", sensorDataLastTimeStamp);
           }
         }
 
@@ -134,21 +130,21 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
           // const bleStatsTimestamps = bleStatsData.map(row => row[timestampColumnName]);
           // console.log(`Timestamp values in "ble_stats":`, bleStatsTimestamps);
 
-          // Filter data in "ble_stats" between sensorDataFirstTimestamp and sensorDataLastTimestamp
+          // Filter data in "ble_stats" between sensorDataFirstTimeStamp and sensorDataLastTimeStamp
           const filteredBleStatsData = bleStatsData.filter(row => {
             const rowTimestamp = row[timestampColumnName];
-            console.log(`Row timestamp: ${rowTimestamp}, Lower Bound: ${sensorDataFirstTimestamp}, Upper Bound: ${sensorDataLastTimestamp}`);
-            return rowTimestamp >= sensorDataFirstTimestamp && rowTimestamp <= sensorDataLastTimestamp;
+            //undefined
+            console.log("Lower Bound Check: ", sensorDataFirstTimeStamp);
+            console.log("Upper Bound Check: ", sensorDataLastTimeStamp);
+            // console.log(`Row timestamp: ${rowTimestamp}, Lower Bound: ${sensorDataFirstTimeStamp}, Upper Bound: ${sensorDataLastTimeStamp}`);
+            return rowTimestamp >= sensorDataFirstTimeStamp && rowTimestamp <= sensorDataLastTimeStamp;
           });
-
           console.log(`Filtered data from sheet "${sheetName}" between first and last timestamp of "sensordata":`, filteredBleStatsData);
 
           // Print all data from "ble_stats" for debugging
-          console.log(`All data from sheet "${sheetName}" in file "${excelFile}":`, bleStatsData);
+          // console.log(`All data from sheet "${sheetName}" in file "${excelFile}":`, bleStatsData);
           // console.log(`Data from sheet "${sheetName}" in file "${excelFile}":`, filteredData);
           console.log(`Number of items in sheet "${sheetName}" in file "${excelFile}":`, filteredData.length);
-        
-          
         }
         else {
           console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
