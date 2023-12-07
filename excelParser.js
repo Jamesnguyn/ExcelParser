@@ -11,6 +11,11 @@ const sheetsToParse = [
   { sheetName: 'sensordata', columns: ['timestamp', 'Display Time'] }
 ];
 
+let sensorDataFirstTimestamp;
+let sensorDataLastTimestamp;
+let lowerBound;
+let upperBound;
+
 // Read the files in the directory
 fs.readdir(privateDataExcelFilePath, (err, files) => {
   if (err) {
@@ -38,7 +43,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     const firstFormattedDate = `${firstDatePart.slice(0, 2)}/${firstDatePart.slice(2, 4)}/${firstDatePart.slice(4)}`;
     const firstTimePart = firstDateAndTime[1];
     const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
-    const lowerBound = firstFormattedDate.concat(".", firstFormattedTime);
+    lowerBound = firstFormattedDate.concat(".", firstFormattedTime);
 
     // find upper bound date and time
     const secondPart = fileNameParts.slice(2).join('.');
@@ -47,17 +52,20 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     const secondFormattedDate = `${secondDatePart.slice(0, 2)}/${secondDatePart.slice(2, 4)}/${secondDatePart.slice(4)}`;
     const secondTimePart = secondDateAndTime[1];
     const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
-    const upperBound = secondFormattedDate.concat(".", secondFormattedTime);
+    upperBound = secondFormattedDate.concat(".", secondFormattedTime);
 
     // Read the Excel file
     const privateDataExcel = XLSX.readFile(excelFilePath);
+
+    let bleStatsData = [];
+    let timestampColumnName;
 
     // Iterate through each sheet
     sheetsToParse.forEach(sheetInfo => {
       const { sheetName, columns } = sheetInfo;
 
       // Check if sheet exists in workbook
-      if(privateDataExcel.Sheets.hasOwnProperty(sheetName)) {
+      if (privateDataExcel.Sheets.hasOwnProperty(sheetName)) {
         // Get the data from the sheet
         const sheetData = XLSX.utils.sheet_to_json(privateDataExcel.Sheets[sheetName], { header: 1 });
 
@@ -69,7 +77,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
           const rowData = {};
           columns.forEach(col => {
             const columnIndex = headerRow.indexOf(col);
-	
+
             // Check if the current column is "Display Time"
             // Now 'sheetData' contains an array of objects representing the data in the current sheet
             if (col === "Display Time") {
@@ -84,7 +92,6 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
           return rowData;
         });
 
-        	
         // Filter data between lowerBound and upperBound
         const filteredData = parsedData.filter(row => {
           const rowDisplayTime = row["Display Time"];
@@ -95,19 +102,45 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
         if (sheetName === "sensordata") {
           if (filteredData.length > 0) {
             const timestampValues = filteredData.map(row => row["timestamp"]);
-            console.log('First Timestamp Value:', timestampValues[0]);
-            console.log('Last Timestamp Value:', timestampValues[filteredData.length - 1]);
+            sensorDataFirstTimestamp = timestampValues[0];
+            sensorDataLastTimestamp = timestampValues[timestampValues.length - 1];
           }
         }
-        // Now 'sheetData' contains an array of objects representing the data in the current sheet
-        // console.log(lowerBound);
-        // console.log(upperBound);
-        // console.log(`Data from sheet "${sheetName}" in file "${excelFile}":`, filteredData);
-        // console.log(`Number of items in sheet "${sheetName}" in file "${excelFile}":`, filteredData.length);
-      }
-      else {
-        console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
+        console.log("First TimeStamp: ", sensorDataFirstTimestamp);
+        console.log("Last TimeStamp: ", sensorDataLastTimestamp);
+        console.log("Lower Bound: ", lowerBound);
+        console.log("Upper Bound: ", upperBound);
+
+        if (sheetName === "ble_stats") {
+          // Check if the "timestamp" column is present
+          timestampColumnName = "toc"; // Change this to the actual column name
+          if (!headerRow.includes(timestampColumnName)) {
+            console.error(`Error: "${timestampColumnName}" column not found in sheet "${sheetName}" in file "${excelFile}".`);
+            return;
+          }
+
+          bleStatsData = sheetData.slice(1).map(row => {
+            const rowData = {};
+            columns.forEach(col => {
+              const columnIndex = headerRow.indexOf(col);
+              rowData[col] = row[columnIndex];
+            });
+            return rowData;
+          });
+        }
+        else {
+          console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
+        }
       }
     });
+
+    const filteredBleStatsData = bleStatsData.filter(row => {
+      const rowTimestamp = row[timestampColumnName];
+      return rowTimestamp >= sensorDataFirstTimestamp && rowTimestamp <= sensorDataLastTimestamp;
+    });
+
+    console.log('FINAL FORM', filteredBleStatsData)
+    console.log('FINAL FORM Length', filteredBleStatsData.length)
+
   });
 });
