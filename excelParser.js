@@ -69,18 +69,44 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
           const rowData = {};
           columns.forEach(col => {
             const columnIndex = headerRow.indexOf(col);
-            rowData[col] = row[columnIndex];
+	
+            // Check if the current column is "Display Time"
+            // Now 'sheetData' contains an array of objects representing the data in the current sheet
+            if (col === "Display Time") {
+              // Split and remove the last element
+              const displayTimeParts = row[columnIndex].split(".");
+              displayTimeParts.pop(); // Remove the last element
+              rowData[col] = displayTimeParts.join(".");
+            } else {
+              rowData[col] = row[columnIndex];
+            }
           });
           return rowData;
         });
 
+        	
+        // Filter data between lowerBound and upperBound
+        const filteredData = parsedData.filter(row => {
+          const rowDisplayTime = row["Display Time"];
+          return rowDisplayTime >= lowerBound && rowDisplayTime <= upperBound;
+        });
+
+        // Extract and print only the timestamp values from the "sensordata" sheet
+        if (sheetName === "sensordata") {
+          if (filteredData.length > 0) {
+            const timestampValues = filteredData.map(row => row["timestamp"]);
+            console.log('First Timestamp Value:', timestampValues[0]);
+            console.log('Last Timestamp Value:', timestampValues[filteredData.length - 1]);
+          }
+        }
         // Now 'sheetData' contains an array of objects representing the data in the current sheet
-        console.log(lowerBound);
-        console.log(upperBound);
-        console.log(`Data from sheet "${sheetName}" in file "${excelFile}":`, parsedData);
+        // console.log(lowerBound);
+        // console.log(upperBound);
+        // console.log(`Data from sheet "${sheetName}" in file "${excelFile}":`, filteredData);
+        // console.log(`Number of items in sheet "${sheetName}" in file "${excelFile}":`, filteredData.length);
       }
       else {
-        //console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
+        console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
       }
     });
   });
