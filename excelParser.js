@@ -25,6 +25,30 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
   excelFiles.forEach(excelFile => {
     const excelFilePath = path.join(privateDataExcelFilePath, excelFile);
 
+    // Extract file name without extension
+    const fileNameWithoutExtension = path.parse(excelFile).name;
+
+    // Split fileNameWithoutExtension by underscores
+    const fileNameParts = fileNameWithoutExtension.split('_');
+
+    // find lower bound date and time
+    const firstPart = fileNameParts.slice(0, 2).join('.');
+    const firstDateAndTime = firstPart.split(".");
+    const firstDatePart = firstDateAndTime[0];
+    const firstFormattedDate = `${firstDatePart.slice(0, 2)}/${firstDatePart.slice(2, 4)}/${firstDatePart.slice(4)}`;
+    const firstTimePart = firstDateAndTime[1];
+    const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
+    const lowerBound = firstFormattedDate.concat(".", firstFormattedTime);
+
+    // find upper bound date and time
+    const secondPart = fileNameParts.slice(2).join('.');
+    const secondDateAndTime = secondPart.split(".");
+    const secondDatePart = secondDateAndTime[0];
+    const secondFormattedDate = `${secondDatePart.slice(0, 2)}/${secondDatePart.slice(2, 4)}/${secondDatePart.slice(4)}`;
+    const secondTimePart = secondDateAndTime[1];
+    const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
+    const upperBound = secondFormattedDate.concat(".", secondFormattedTime);
+
     // Read the Excel file
     const privateDataExcel = XLSX.readFile(excelFilePath);
 
@@ -51,10 +75,12 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
         });
 
         // Now 'sheetData' contains an array of objects representing the data in the current sheet
+        console.log(lowerBound);
+        console.log(upperBound);
         console.log(`Data from sheet "${sheetName}" in file "${excelFile}":`, parsedData);
       }
       else {
-        console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
+        //console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
       }
     });
   });
