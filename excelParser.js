@@ -7,7 +7,7 @@ const privateDataExcelFilePath = 'privateData';
 
 // Specify the sheet names you want to parse
 const sheetsToParse = [
-  { sheetName: 'ble_stats', columns: ['toc', 'ttc', 'ttd', 'tic'] },
+  { sheetName: 'ble_stats', columns: ['toc', 'ttc', 'ttd', 'tic', "cmp"] },
   { sheetName: 'sensordata', columns: ['timestamp', 'Display Time'] }
 ];
 
@@ -104,12 +104,10 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
             const timestampValues = filteredData.map(row => row["timestamp"]);
             sensorDataFirstTimestamp = timestampValues[0];
             sensorDataLastTimestamp = timestampValues[timestampValues.length - 1];
+            console.log(sensorDataFirstTimestamp);
+            console.log(sensorDataLastTimestamp);
           }
         }
-        console.log("First TimeStamp: ", sensorDataFirstTimestamp);
-        console.log("Last TimeStamp: ", sensorDataLastTimestamp);
-        console.log("Lower Bound: ", lowerBound);
-        console.log("Upper Bound: ", upperBound);
 
         if (sheetName === "ble_stats") {
           // Check if the "timestamp" column is present
@@ -139,8 +137,73 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
       return rowTimestamp >= sensorDataFirstTimestamp && rowTimestamp <= sensorDataLastTimestamp;
     });
 
-    console.log('FINAL FORM', filteredBleStatsData)
-    console.log('FINAL FORM Length', filteredBleStatsData.length)
+    // =================TTC=============================
+    // Extract "ttc" values from the filtered BLE Stats data
+    const ttcValues = filteredBleStatsData.map(row => parseFloat(row['ttc']));
 
+    // Calculate minimum, maximum, and average values
+    const minTTC = Math.min(...ttcValues);
+    const maxTTC = Math.max(...ttcValues);
+    const avgTTC = ttcValues.reduce((sum, value) => sum + value, 0) / ttcValues.length;
+
+    // Round average to two decimal points
+    const roundedAvgTTC = avgTTC.toFixed(2);
+
+    // =================TTD=============================
+    // Extract "ttd" values from the filtered BLE Stats data
+    const ttdValues = filteredBleStatsData.map(row => parseFloat(row['ttd']));
+
+    // Calculate minimum, maximum, and average values
+    const minTTD = Math.min(...ttdValues);
+    const maxTTD = Math.max(...ttdValues);
+    const avgTTD = ttdValues.reduce((sum, value) => sum + value, 0) / ttdValues.length;
+
+    // Round average to two decimal points
+    const roundedAvgTTD = avgTTD.toFixed(2);
+
+    // =================TIC=============================
+    // Extract "ttc" values from the filtered BLE Stats data
+    const ticValues = filteredBleStatsData.map(row => parseFloat(row['tic']));
+
+    // Calculate minimum, maximum, and average values
+    const minTIC = Math.min(...ticValues);
+    const maxTIC = Math.max(...ticValues);
+    const avgTIC = ticValues.reduce((sum, value) => sum + value, 0) / ticValues.length;
+
+    // Round average to two decimal points
+    const roundedAvgTIC = avgTIC.toFixed(2);
+
+    // =================CMP=============================
+    // Extract "ttc" values from the filtered BLE Stats data
+    const cmpValues = filteredBleStatsData.map(row => parseFloat(row['cmp']));
+
+    // Calculate sum value
+    const sumCMP = cmpValues.reduce((sum, value) => sum + value, 0);
+
+    // console.log('Filtered BLE Data', filteredBleStatsData);
+    // console.log('Filtered BLE Data Length', filteredBleStatsData.length + 1);
+
+    console.log('Minimum TTC:', minTTC);
+    console.log('Maximum TTC:', maxTTC);
+    console.log('Average TTC:', roundedAvgTTC);
+    console.log('STD TTC:', );
+
+    console.log("========================================");
+
+    console.log('Minimum TTD:', minTTD);
+    console.log('Maximum TTD:', maxTTD);
+    console.log('Average TTD:', roundedAvgTTD);
+    console.log('STD TTD:', );
+
+    console.log("========================================");
+
+    console.log('Minimum TIC:', minTIC);
+    console.log('Maximum TIC:', maxTIC);
+    console.log('Average TIC:', roundedAvgTIC);
+    console.log('STD TIC:', );
+
+    console.log("========================================");
+
+    console.log('Sum CMP:', sumCMP);
   });
 });
