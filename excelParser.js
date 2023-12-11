@@ -8,7 +8,8 @@ const privateDataExcelFilePath = 'privateData';
 // Specify the sheet names you want to parse
 const sheetsToParse = [
   { sheetName: 'ble_stats', columns: ['toc', 'ttc', 'ttd', 'tic', "cmp"] },
-  { sheetName: 'sensordata', columns: ['timestamp', 'Display Time'] }
+  { sheetName: 'sensordata', columns: ['timestamp', 'Display Time'] },
+  { sheetName: 'log_info', columns: ['Display Time', 'code0'] }
 ];
 
 let sensorDataFirstTimestamp;
@@ -44,6 +45,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     const firstTimePart = firstDateAndTime[1];
     const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
     lowerBound = firstFormattedDate.concat(".", firstFormattedTime);
+    // console.log(lowerBound);
 
     // find upper bound date and time
     const secondPart = fileNameParts.slice(2).join('.');
@@ -53,11 +55,13 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     const secondTimePart = secondDateAndTime[1];
     const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
     upperBound = secondFormattedDate.concat(".", secondFormattedTime);
+    // console.log(upperBound);
 
     // Read the Excel file
     const privateDataExcel = XLSX.readFile(excelFilePath);
 
     let bleStatsData = [];
+    let rssiValues = [];
     let timestampColumnName;
 
     // Iterate through each sheet
@@ -126,6 +130,29 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
             return rowData;
           });
         }
+        
+        else if (sheetName === "log_info"){
+          rssiValues = filteredData.map(row => parseFloat(row["code0"]));
+
+          const minRssi = Math.min(...rssiValues);
+          const maxRssi = Math.max(...rssiValues);
+          const avgRssi = rssiValues.reduce((sum, value) => sum + value, 0) / rssiValues.length;
+          const roundedAvgRssi = avgRssi.toFixed(2);
+
+          const below88Count = rssiValues.filter(value => value < 88).length;
+          const equalOrAbove88Count = rssiValues.filter(value => value >= 88).length;
+          const equalOrAbove95Count = rssiValues.filter(value => value >= 95).length;
+
+          console.log("========================================");
+          console.log("Total RSSI Count: ", rssiValues.length);
+          console.log("Num less than 88: ", below88Count);
+          console.log("Num greater than or equal to 88: ", equalOrAbove88Count);
+          console.log("Num greater than or equal to 95: ", equalOrAbove95Count);
+          console.log('Minimum RSSI:', minRssi);
+          console.log('Maximum RSSI:', maxRssi);
+          console.log('Average RSSI:', roundedAvgRssi);
+          console.log("========================================");
+        }
         else {
           console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
         }
@@ -149,6 +176,16 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     // Round average to two decimal points
     const roundedAvgTTC = avgTTC.toFixed(2);
 
+    // Calculate Standard Deviation
+    // Calculate the sum of squared differences from the average
+    const ttcSumSquaredDifferences = ttcValues.reduce((sum, value) => sum + Math.pow(value - avgTTC, 2), 0);
+    // Calculate the variance
+    const ttcVariance = ttcSumSquaredDifferences / ttcValues.length;
+    // Calculate the standard deviation
+    const ttcStdDeviation = Math.sqrt(ttcVariance);
+    // Round standard deviation to two decimal points
+    const ttcRoundedStdDeviation = ttcStdDeviation.toFixed(2);
+
     // =================TTD=============================
     // Extract "ttd" values from the filtered BLE Stats data
     const ttdValues = filteredBleStatsData.map(row => parseFloat(row['ttd']));
@@ -161,6 +198,16 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     // Round average to two decimal points
     const roundedAvgTTD = avgTTD.toFixed(2);
 
+    // Calculate Standard Deviation
+    // Calculate the sum of squared differences from the average
+    const ttdSumSquaredDifferences = ttdValues.reduce((sum, value) => sum + Math.pow(value - avgTTD, 2), 0);
+    // Calculate the variance
+    const ttdVariance = ttdSumSquaredDifferences / ttdValues.length;
+    // Calculate the standard deviation
+    const ttdStdDeviation = Math.sqrt(ttdVariance);
+    // Round standard deviation to two decimal points
+    const ttdRoundedStdDeviation = ttdStdDeviation.toFixed(2);
+
     // =================TIC=============================
     // Extract "ttc" values from the filtered BLE Stats data
     const ticValues = filteredBleStatsData.map(row => parseFloat(row['tic']));
@@ -172,6 +219,16 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
     // Round average to two decimal points
     const roundedAvgTIC = avgTIC.toFixed(2);
+
+    // Calculate Standard Deviation
+    // Calculate the sum of squared differences from the average
+    const ticSumSquaredDifferences = ticValues.reduce((sum, value) => sum + Math.pow(value - avgTIC, 2), 0);
+    // Calculate the variance
+    const ticVariance = ticSumSquaredDifferences / ticValues.length;
+    // Calculate the standard deviation
+    const ticStdDeviation = Math.sqrt(ticVariance);
+    // Round standard deviation to two decimal points
+    const ticRoundedStdDeviation = ticStdDeviation.toFixed(2);
 
     // =================CMP=============================
     // Extract "ttc" values from the filtered BLE Stats data
@@ -186,24 +243,26 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     console.log('Minimum TTC:', minTTC);
     console.log('Maximum TTC:', maxTTC);
     console.log('Average TTC:', roundedAvgTTC);
-    console.log('STD TTC:', );
+    console.log('STD TTC:', ttcRoundedStdDeviation);
 
     console.log("========================================");
 
     console.log('Minimum TTD:', minTTD);
     console.log('Maximum TTD:', maxTTD);
     console.log('Average TTD:', roundedAvgTTD);
-    console.log('STD TTD:', );
+    console.log('STD TTD:', ttdRoundedStdDeviation);
 
     console.log("========================================");
 
     console.log('Minimum TIC:', minTIC);
     console.log('Maximum TIC:', maxTIC);
     console.log('Average TIC:', roundedAvgTIC);
-    console.log('STD TIC:', );
+    console.log('STD TIC:', ticRoundedStdDeviation);
 
     console.log("========================================");
 
     console.log('Sum CMP:', sumCMP);
+
+    console.log("========================================");
   });
 });
