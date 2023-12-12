@@ -3,6 +3,6 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "build": "node tdvParser.js"
+    "tdv": "node tdvParser.js"
   }
 }
