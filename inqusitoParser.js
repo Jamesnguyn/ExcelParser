@@ -8,9 +8,11 @@ const inquisitoDataExcelFilePath = 'inquisitoData';
 const fileType = '.xlsx';
 
 const sheetPhoneErrorLog = 'PhoneErrorLog';
+const sheetPhoneUserActivity = 'PhoneUserActivity';
 
 const columnMessage = 'Message';
 const columnRecordedDisplayTime = 'RecordedDisplayTime';
+const columnData = 'Data';
 
 const sheetsToParse = [
     { sheetName: sheetPhoneErrorLog, columns: [columnMessage, columnRecordedDisplayTime]}
@@ -35,6 +37,6 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
 
         // Split filewithoutExension by underscores
         const fileNameParts = fileNameWithoutExtension.split('_');
-        
+
     })
 })
