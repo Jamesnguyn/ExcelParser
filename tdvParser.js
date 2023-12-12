@@ -3,13 +3,28 @@ const fs = require('fs');
 const path = require('path');
 
 // Specify the directory path
-const privateDataExcelFilePath = 'privateData';
+const privateDataExcelFilePath = 'tdvData';
+
+const fileType = '.xlsx';
+
+const sheetBLEStats = 'ble_stats';
+const sheetSensorData = 'sensordata';
+const sheetNameLogInfo = 'log_info';
+
+const columnTOC = 'toc';
+const columnTTC = 'ttc';
+const columnTTD = 'ttd';
+const columnTIC = 'tic';
+const columnCMP = 'cmp';
+const columnTimestamp = 'timestamp';
+const columnDisplayTime = 'Display Time';
+const columnCode0 = 'code0';
 
 // Specify the sheet names you want to parse
 const sheetsToParse = [
-  { sheetName: 'ble_stats', columns: ['toc', 'ttc', 'ttd', 'tic', "cmp"] },
-  { sheetName: 'sensordata', columns: ['timestamp', 'Display Time'] },
-  { sheetName: 'log_info', columns: ['Display Time', 'code0'] }
+  { sheetName: sheetBLEStats, columns: [columnTOC, columnTTC, columnTTD, columnTIC, columnCMP] },
+  { sheetName: sheetSensorData, columns: [columnTimestamp, columnDisplayTime] },
+  { sheetName: sheetNameLogInfo, columns: [columnDisplayTime, columnCode0] }
 ];
 
 let sensorDataFirstTimestamp;
@@ -25,7 +40,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
   }
 
   // Filter Excel files
-  const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx');
+  const excelFiles = files.filter(file => path.extname(file).toLowerCase() === fileType);
 
   // Iterate through each Excel file
   excelFiles.forEach(excelFile => {
@@ -84,7 +99,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
             // Check if the current column is "Display Time"
             // Now 'sheetData' contains an array of objects representing the data in the current sheet
-            if (col === "Display Time") {
+            if (col === columnDisplayTime) {
               // Split and remove the last element
               const displayTimeParts = row[columnIndex].split(".");
               displayTimeParts.pop(); // Remove the last element
@@ -98,24 +113,24 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
         // Filter data between lowerBound and upperBound
         const filteredData = parsedData.filter(row => {
-          const rowDisplayTime = row["Display Time"];
+          const rowDisplayTime = row[columnDisplayTime];
           return rowDisplayTime >= lowerBound && rowDisplayTime <= upperBound;
         });
 
         // Extract and print only the timestamp values from the "sensordata" sheet
-        if (sheetName === "sensordata") {
+        if (sheetName === sheetSensorData) {
           if (filteredData.length > 0) {
-            const timestampValues = filteredData.map(row => row["timestamp"]);
+            const timestampValues = filteredData.map(row => row[columnTimestamp]);
             sensorDataFirstTimestamp = timestampValues[0];
             sensorDataLastTimestamp = timestampValues[timestampValues.length - 1];
-            console.log(sensorDataFirstTimestamp);
-            console.log(sensorDataLastTimestamp);
+            console.log('timestamp 1:', sensorDataFirstTimestamp);
+            console.log('timestamp 2:', sensorDataLastTimestamp);
           }
         }
 
-        if (sheetName === "ble_stats") {
+        if (sheetName === sheetBLEStats) {
           // Check if the "timestamp" column is present
-          timestampColumnName = "toc"; // Change this to the actual column name
+          timestampColumnName = columnTOC; // Change this to the actual column name
           if (!headerRow.includes(timestampColumnName)) {
             console.error(`Error: "${timestampColumnName}" column not found in sheet "${sheetName}" in file "${excelFile}".`);
             return;
@@ -131,8 +146,8 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
           });
         }
         
-        else if (sheetName === "log_info"){
-          rssiValues = filteredData.map(row => parseFloat(row["code0"]));
+        if (sheetName === sheetNameLogInfo){
+          rssiValues = filteredData.map(row => parseFloat(row[columnCode0]));
 
           const minRssi = Math.min(...rssiValues);
           const maxRssi = Math.max(...rssiValues);
@@ -144,6 +159,8 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
           const equalOrAbove95Count = rssiValues.filter(value => value >= 95).length;
 
           console.log("========================================");
+          console.log("RSSI Values:");
+          console.log(JSON.stringify(rssiValues));
           console.log("Total RSSI Count: ", rssiValues.length);
           console.log("Num less than 88: ", below88Count);
           console.log("Num greater than or equal to 88: ", equalOrAbove88Count);
@@ -166,7 +183,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
     // =================TTC=============================
     // Extract "ttc" values from the filtered BLE Stats data
-    const ttcValues = filteredBleStatsData.map(row => parseFloat(row['ttc']));
+    const ttcValues = filteredBleStatsData.map(row => parseFloat(row[columnTTC]));
 
     // Calculate minimum, maximum, and average values
     const minTTC = Math.min(...ttcValues);
@@ -188,7 +205,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
     // =================TTD=============================
     // Extract "ttd" values from the filtered BLE Stats data
-    const ttdValues = filteredBleStatsData.map(row => parseFloat(row['ttd']));
+    const ttdValues = filteredBleStatsData.map(row => parseFloat(row[columnTTD]));
 
     // Calculate minimum, maximum, and average values
     const minTTD = Math.min(...ttdValues);
@@ -210,7 +227,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
     // =================TIC=============================
     // Extract "ttc" values from the filtered BLE Stats data
-    const ticValues = filteredBleStatsData.map(row => parseFloat(row['tic']));
+    const ticValues = filteredBleStatsData.map(row => parseFloat(row[columnTIC]));
 
     // Calculate minimum, maximum, and average values
     const minTIC = Math.min(...ticValues);
@@ -231,8 +248,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     const ticRoundedStdDeviation = ticStdDeviation.toFixed(2);
 
     // =================CMP=============================
-    // Extract "ttc" values from the filtered BLE Stats data
-    const cmpValues = filteredBleStatsData.map(row => parseFloat(row['cmp']));
+    const cmpValues = filteredBleStatsData.map(row => parseFloat(row[columnCMP]));
 
     // Calculate sum value
     const sumCMP = cmpValues.reduce((sum, value) => sum + value, 0);
@@ -240,6 +256,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
     // console.log('Filtered BLE Data', filteredBleStatsData);
     // console.log('Filtered BLE Data Length', filteredBleStatsData.length + 1);
 
+    console.log('Time to Connect:');
     console.log('Minimum TTC:', minTTC);
     console.log('Maximum TTC:', maxTTC);
     console.log('Average TTC:', roundedAvgTTC);
@@ -247,6 +264,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
     console.log("========================================");
 
+    console.log('Time to Disconnect:');
     console.log('Minimum TTD:', minTTD);
     console.log('Maximum TTD:', maxTTD);
     console.log('Average TTD:', roundedAvgTTD);
@@ -254,6 +272,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
     console.log("========================================");
 
+    console.log('Time in Connection:');
     console.log('Minimum TIC:', minTIC);
     console.log('Maximum TIC:', maxTIC);
     console.log('Average TIC:', roundedAvgTIC);
@@ -261,6 +280,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
     console.log("========================================");
 
+    console.log('EGV Capture:');
     console.log('Sum CMP:', sumCMP);
 
     console.log("========================================");
