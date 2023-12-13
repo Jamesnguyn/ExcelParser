@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Specify the directory path
-const privateDataExcelFilePath = 'tdvData';
+const tdvDataExcelFilePath = 'tdvData';
 
 const fileType = '.xlsx';
 
@@ -33,7 +33,7 @@ let lowerBound;
 let upperBound;
 
 // Read the files in the directory
-fs.readdir(privateDataExcelFilePath, (err, files) => {
+fs.readdir(tdvDataExcelFilePath, (err, files) => {
   if (err) {
     console.error('Error reading directory:', err);
     return;
@@ -44,7 +44,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
   // Iterate through each Excel file
   excelFiles.forEach(excelFile => {
-    const excelFilePath = path.join(privateDataExcelFilePath, excelFile);
+    const excelFilePath = path.join(tdvDataExcelFilePath, excelFile);
 
     // Extract file name without extension
     const fileNameWithoutExtension = path.parse(excelFile).name;
@@ -160,7 +160,7 @@ fs.readdir(privateDataExcelFilePath, (err, files) => {
 
           console.log("========================================");
           console.log("RSSI Values:");
-          console.log(JSON.stringify(rssiValues));
+          console.log(JSON.stringify(rssiValues, null, 2));
           console.log("Total RSSI Count: ", rssiValues.length);
           console.log("Num less than 88: ", below88Count);
           console.log("Num greater than or equal to 88: ", equalOrAbove88Count);

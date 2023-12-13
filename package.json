@@ -3,6 +3,8 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "tdv": "node tdvParser.js"
+    "build": "node tdvParser.js & node inquisitoParser.js",
+    "tdv": "node tdvParser.js",
+    "inq": "node inquisitoParser.js"
   }
 }
