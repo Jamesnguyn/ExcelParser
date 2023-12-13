@@ -145,8 +145,8 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
             return rowData;
           });
         }
-        
-        if (sheetName === sheetNameLogInfo){
+
+        if (sheetName === sheetNameLogInfo) {
           rssiValues = filteredData.map(row => parseFloat(row[columnCode0]));
 
           const minRssi = Math.min(...rssiValues);

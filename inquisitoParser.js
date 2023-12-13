@@ -16,6 +16,8 @@ const columnData = 'Data';
 
 const messageCGMReadings = 'CGM readings:';
 const messageReadEGV = 'readEGV';
+const messageOnReadRssi = 'onReadRssi:';
+const dataRssi = `"Rssi":`;
 
 let lowerBound;
 let upperBound;
@@ -107,7 +109,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
             rowRecordedDisplayTime >= lowerBound &&
             rowRecordedDisplayTime <= upperBound &&
             (row[columnMessage].includes(messageCGMReadings) ||
-            row[columnMessage].includes(messageReadEGV))
+              row[columnMessage].includes(messageReadEGV))
           );
         });
 
@@ -118,7 +120,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
         });
 
         console.log('=============================================');
-        console.log('File: ',fileNameWithoutExtension);
+        console.log('File: ', fileNameWithoutExtension);
         console.log(`Number of captured EGVs: ${capturedEGVs}`);
       }
     })
