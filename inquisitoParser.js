@@ -21,6 +21,7 @@ const dataRssi = `"Rssi":`;
 
 let lowerBound;
 let upperBound;
+let dataRssiValues = [];
 
 const sheetsToParse = [
   { sheetName: sheetPhoneErrorLog, columns: [columnMessage, columnRecordedDisplayTime] }
@@ -54,7 +55,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     const firstTimePart = firstDateAndTime[1];
     const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
     lowerBound = `${firstFormattedDate} ${firstFormattedTime}`;
-    // console.log(lowerBound);
+    console.log(lowerBound);
 
     // find upper bound date and time
     const secondPart = fileNameParts.slice(2).join('.');
@@ -64,7 +65,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     const secondTimePart = secondDateAndTime[1];
     const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
     upperBound = `${secondFormattedDate} ${secondFormattedTime}`;
-    // console.log(upperBound);
+    console.log(upperBound);
 
     // Read the Excel file
     const inquisitoDataExcel = XLSX.readFile(excelFilePath);
@@ -129,6 +130,51 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
                 console.log(`${Math.abs(rssiValue)}`);
               }
             }
+
+            else {
+              // If "onReadRssi" is not present, navigate to "sheetPhoneUserActivity" file
+              const userActivitySheet = inquisitoDataExcel.Sheets[sheetPhoneUserActivity];
+              if (userActivitySheet) {
+                const userActivityData = XLSX.utils.sheet_to_json(userActivitySheet, { header: 1 });
+
+                // Find column indices in the header row
+                const headerRowUserActivity = userActivityData[0];
+                const columnIndexRecordedDisplayTime = headerRowUserActivity ? headerRowUserActivity.indexOf(columnRecordedDisplayTime) : -1;
+                const columnIndexData = headerRowUserActivity ? headerRowUserActivity.indexOf(columnData) : -1;
+
+                if (columnIndexRecordedDisplayTime !== -1 && columnIndexData !== -1) {
+                  // Extract values from the "columnData" column associated with "columnRecordedDisplayTime" that include "dataRssi"
+                  dataRssiValues = userActivityData.slice(1)
+                    .filter(row => {
+                      const rowRecordedDisplayTime = row[columnIndexRecordedDisplayTime];
+                      const rowData = row[columnIndexData];
+                      if (rowData === undefined) {
+                        console.log(`Undefined value in columnData for Recorded Display Time ${rowRecordedDisplayTime}`);
+                        return false;
+                      }
+                      return (
+                        rowRecordedDisplayTime >= lowerBound &&
+                        rowRecordedDisplayTime <= upperBound &&
+                        rowData && rowData.includes(dataRssi)
+                      );
+                    })
+                    .map(row => {
+                      try {
+                        const jsonData = JSON.parse(row[columnIndexData]);
+                        return jsonData?.['Rssi'];
+                      } catch (error) {
+                        console.error(`Error parsing JSON in row with Recorded Display Time ${row[columnIndexRecordedDisplayTime]}`);
+                        return null; // or handle it according to your needs
+                      }
+                    })
+                    .filter(value => value !== null && value !== undefined); // Remove null and undefined values
+                } else {
+                  console.log(`Column ${columnRecordedDisplayTime} or ${columnData} not found in sheetPhoneUserActivity`);
+                }
+              } else {
+                console.log(`Sheet ${sheetPhoneUserActivity} not found in the file`);
+              }
+            }
           }
         });
 
@@ -136,6 +182,17 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
         filteredData.forEach(row => {
           // console.log(row[columnRecordedDisplayTime], row[columnMessage]);
           capturedEGVs++;
+        });
+
+        // Print the values of "Rssi" that include "dataRssi"
+        dataRssiValues
+        .filter(value => value !== null && value !== undefined)
+        .forEach(value => {
+          if (typeof value === 'number') {
+            console.log(Math.abs(value));
+          } else {
+            console.error(`Invalid value for Rssi: ${value}`);
+          }
         });
 
         console.log('=============================================');
