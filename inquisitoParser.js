@@ -102,15 +102,34 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
           return rowData;
         });
 
-        // Filter data between lowerBound and upperBound
         const filteredData = parsedData.filter(row => {
           const rowRecordedDisplayTime = row[columnRecordedDisplayTime];
-          return (
+          const messageIncludesCGMReadings = row[columnMessage].includes(messageCGMReadings);
+          const messageIncludesReadEGV = row[columnMessage].includes(messageReadEGV);
+          const messageIncludesOnReadRssi = row[columnMessage].includes(messageOnReadRssi);
+
+          if (
             rowRecordedDisplayTime >= lowerBound &&
             rowRecordedDisplayTime <= upperBound &&
-            (row[columnMessage].includes(messageCGMReadings) ||
-              row[columnMessage].includes(messageReadEGV))
-          );
+            (messageIncludesCGMReadings || messageIncludesReadEGV || messageIncludesOnReadRssi)
+          ) {
+            // Print the values between the parameters
+            // console.log(row[columnRecordedDisplayTime], row[columnMessage]);
+
+            // Count captured EGVs only for CGMReadings and ReadEGV
+            if (messageIncludesCGMReadings || messageIncludesReadEGV) {
+              capturedEGVs++;
+            }
+
+            // Check if the message includes "onReadRssi" and print only the numbers in absolute value
+            if (messageIncludesOnReadRssi) {
+              const rssiMatch = row[columnMessage].match(/onReadRssi: (-?\d+)/);
+              if (rssiMatch) {
+                const rssiValue = parseInt(rssiMatch[1], 10);
+                console.log(`${Math.abs(rssiValue)}`);
+              }
+            }
+          }
         });
 
         // Print the values between the parameters
