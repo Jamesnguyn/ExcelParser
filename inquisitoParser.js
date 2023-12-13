@@ -15,7 +15,7 @@ const columnRecordedDisplayTime = 'RecordedDisplayTime';
 const columnData = 'Data';
 
 const messageCGMReadings = 'CGM readings:';
-const messageReadEGV = 'Read EGV';
+const messageReadEGV = 'readEGV';
 
 let lowerBound;
 let upperBound;
@@ -106,8 +106,8 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
           return (
             rowRecordedDisplayTime >= lowerBound &&
             rowRecordedDisplayTime <= upperBound &&
-            row[columnMessage].includes(messageCGMReadings) ||
-            row[columnMessage].includes(messageReadEGV)
+            (row[columnMessage].includes(messageCGMReadings) ||
+            row[columnMessage].includes(messageReadEGV))
           );
         });
 
@@ -117,19 +117,9 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
           capturedEGVs++;
         });
 
+        console.log('=============================================');
+        console.log('File: ',fileNameWithoutExtension);
         console.log(`Number of captured EGVs: ${capturedEGVs}`);
-
-        // Extract and print only the timestamp values from the "sensordata" sheet
-        // if (sheetName === sheetPhoneErrorLog) {
-        //   if (filteredData.length > 0) {
-        //     const recordedDisplayTime = filteredData.map(row => row[columnRecordedDisplayTime]);
-        //     // console.log(timestampValues);
-        //     phoneErrorLogFirstRecordedTime = recordedDisplayTime[0];
-        //     phoneErrorLogSecondRecordedTime = recordedDisplayTime[recordedDisplayTime.length - 1];
-        //     console.log('Recorded Display Time 1:', phoneErrorLogFirstRecordedTime);
-        //     console.log('Recorded Display Time 2:', phoneErrorLogSecondRecordedTime);
-        //   }
-        // }
       }
     })
   })
