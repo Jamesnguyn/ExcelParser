@@ -131,50 +131,50 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
               }
             }
 
-            else {
-              // If "onReadRssi" is not present, navigate to "sheetPhoneUserActivity" file
-              const userActivitySheet = inquisitoDataExcel.Sheets[sheetPhoneUserActivity];
-              if (userActivitySheet) {
-                const userActivityData = XLSX.utils.sheet_to_json(userActivitySheet, { header: 1 });
+            // else {
+            //   // If "onReadRssi" is not present, navigate to "sheetPhoneUserActivity" file
+            //   const userActivitySheet = inquisitoDataExcel.Sheets[sheetPhoneUserActivity];
+            //   if (userActivitySheet) {
+            //     const userActivityData = XLSX.utils.sheet_to_json(userActivitySheet, { header: 1 });
 
-                // Find column indices in the header row
-                const headerRowUserActivity = userActivityData[0];
-                const columnIndexRecordedDisplayTime = headerRowUserActivity ? headerRowUserActivity.indexOf(columnRecordedDisplayTime) : -1;
-                const columnIndexData = headerRowUserActivity ? headerRowUserActivity.indexOf(columnData) : -1;
+            //     // Find column indices in the header row
+            //     const headerRowUserActivity = userActivityData[0];
+            //     const columnIndexRecordedDisplayTime = headerRowUserActivity ? headerRowUserActivity.indexOf(columnRecordedDisplayTime) : -1;
+            //     const columnIndexData = headerRowUserActivity ? headerRowUserActivity.indexOf(columnData) : -1;
 
-                if (columnIndexRecordedDisplayTime !== -1 && columnIndexData !== -1) {
-                  // Extract values from the "columnData" column associated with "columnRecordedDisplayTime" that include "dataRssi"
-                  dataRssiValues = userActivityData.slice(1)
-                    .filter(row => {
-                      const rowRecordedDisplayTime = row[columnIndexRecordedDisplayTime];
-                      const rowData = row[columnIndexData];
-                      if (rowData === undefined) {
-                        console.log(`Undefined value in columnData for Recorded Display Time ${rowRecordedDisplayTime}`);
-                        return false;
-                      }
-                      return (
-                        rowRecordedDisplayTime >= lowerBound &&
-                        rowRecordedDisplayTime <= upperBound &&
-                        rowData && rowData.includes(dataRssi)
-                      );
-                    })
-                    .map(row => {
-                      try {
-                        const jsonData = JSON.parse(row[columnIndexData]);
-                        return jsonData?.['Rssi'];
-                      } catch (error) {
-                        console.error(`Error parsing JSON in row with Recorded Display Time ${row[columnIndexRecordedDisplayTime]}`);
-                        return null; // or handle it according to your needs
-                      }
-                    })
-                    .filter(value => value !== null && value !== undefined); // Remove null and undefined values
-                } else {
-                  console.log(`Column ${columnRecordedDisplayTime} or ${columnData} not found in sheetPhoneUserActivity`);
-                }
-              } else {
-                console.log(`Sheet ${sheetPhoneUserActivity} not found in the file`);
-              }
-            }
+            //     if (columnIndexRecordedDisplayTime !== -1 && columnIndexData !== -1) {
+            //       // Extract values from the "columnData" column associated with "columnRecordedDisplayTime" that include "dataRssi"
+            //       dataRssiValues = userActivityData.slice(1)
+            //         .filter(row => {
+            //           const rowRecordedDisplayTime = row[columnIndexRecordedDisplayTime];
+            //           const rowData = row[columnIndexData];
+            //           if (rowData === undefined) {
+            //             console.log(`Undefined value in columnData for Recorded Display Time ${rowRecordedDisplayTime}`);
+            //             return false;
+            //           }
+            //           return (
+            //             rowRecordedDisplayTime >= lowerBound &&
+            //             rowRecordedDisplayTime <= upperBound &&
+            //             rowData && rowData.includes(dataRssi)
+            //           );
+            //         })
+            //         .map(row => {
+            //           try {
+            //             const jsonData = JSON.parse(row[columnIndexData]);
+            //             return jsonData?.['Rssi'];
+            //           } catch (error) {
+            //             console.error(`Error parsing JSON in row with Recorded Display Time ${row[columnIndexRecordedDisplayTime]}`);
+            //             return null; // or handle it according to your needs
+            //           }
+            //         })
+            //         .filter(value => value !== null && value !== undefined); // Remove null and undefined values
+            //     } else {
+            //       console.log(`Column ${columnRecordedDisplayTime} or ${columnData} not found in sheetPhoneUserActivity`);
+            //     }
+            //   } else {
+            //     console.log(`Sheet ${sheetPhoneUserActivity} not found in the file`);
+            //   }
+            // }
           }
         });
 
