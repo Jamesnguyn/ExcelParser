@@ -22,6 +22,7 @@ const dataRssi = `"Rssi":`;
 let lowerBound;
 let upperBound;
 let dataRssiValues = [];
+let rssiCount = 0;
 
 const sheetsToParse = [
   { sheetName: sheetPhoneErrorLog, columns: [columnMessage, columnRecordedDisplayTime] }
@@ -54,7 +55,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     const firstFormattedDate = `${firstDatePart.slice(4)}-${firstDatePart.slice(0, 2)}-${firstDatePart.slice(2, 4)}`;
     const firstTimePart = firstDateAndTime[1];
     const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
-    lowerBound = `${firstFormattedDate} ${firstFormattedTime}`;
+    lowerBound = new Date(`${firstFormattedDate} ${firstFormattedTime}`).toISOString();
     console.log(lowerBound);
 
     // find upper bound date and time
@@ -64,7 +65,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     const secondFormattedDate = `${secondDatePart.slice(4)}-${secondDatePart.slice(0, 2)}-${secondDatePart.slice(2, 4)}`;
     const secondTimePart = secondDateAndTime[1];
     const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
-    upperBound = `${secondFormattedDate} ${secondFormattedTime}`;
+    upperBound = new Date(`${secondFormattedDate} ${secondFormattedTime}`).toISOString();
     console.log(upperBound);
 
     // Read the Excel file
@@ -94,8 +95,9 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
             if (col === columnRecordedDisplayTime) {
               // Split and remove the last element
               const displayTimeParts = row[columnIndex].split(".");
-              displayTimeParts.pop(); // Remove the last element
-              rowData[col] = displayTimeParts.join(".");
+              const formattedDate = displayTimeParts.join(".");
+              const dateObject = new Date(formattedDate);
+              rowData[col] = dateObject.toISOString();
             } else {
               rowData[col] = row[columnIndex];
             }
@@ -128,6 +130,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
               if (rssiMatch) {
                 const rssiValue = parseInt(rssiMatch[1], 10);
                 console.log(`${Math.abs(rssiValue)}`);
+                rssiCount++;
               }
             }
 
@@ -198,6 +201,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
         console.log('=============================================');
         console.log('File: ', fileNameWithoutExtension);
         console.log(`Number of captured EGVs: ${capturedEGVs}`);
+        console.log(`Number of RSSI values: ${rssiCount}`);
       }
     })
   })
