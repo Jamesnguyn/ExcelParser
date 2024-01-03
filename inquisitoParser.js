@@ -56,7 +56,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     const firstTimePart = firstDateAndTime[1];
     const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
     lowerBound = new Date(`${firstFormattedDate} ${firstFormattedTime}`).toISOString();
-    console.log(lowerBound);
+    console.log('Lower bound UTC: ',lowerBound);
 
     // find upper bound date and time
     const secondPart = fileNameParts.slice(2).join('.');
@@ -66,8 +66,9 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     const secondTimePart = secondDateAndTime[1];
     const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
     upperBound = new Date(`${secondFormattedDate} ${secondFormattedTime}`).toISOString();
-    console.log(upperBound);
-
+    console.log('Upper bound UTC: ', upperBound);
+    console.log('=============================================');
+    
     // Read the Excel file
     const inquisitoDataExcel = XLSX.readFile(excelFilePath);
 
@@ -198,10 +199,12 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
           }
         });
 
-        console.log('=============================================');
-        console.log('File: ', fileNameWithoutExtension);
-        console.log(`Number of captured EGVs: ${capturedEGVs}`);
         console.log(`Number of RSSI values: ${rssiCount}`);
+        console.log('=============================================');
+        console.log(`Number of captured EGVs: ${capturedEGVs}`);
+        console.log('File: ', fileNameWithoutExtension);
+        console.log('=============================================');
+        
       }
     })
   })
