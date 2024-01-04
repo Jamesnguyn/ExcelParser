@@ -133,8 +133,8 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
               const rssiMatch = row[columnMessage].match(/onReadRssi: (-?\d+)/);
               if (rssiMatch) {
                 const rssiValue = parseInt(rssiMatch[1], 10);
-                console.log(`${Math.abs(rssiValue)}`);
-                rssiCount++;
+                // console.log(`${Math.abs(rssiValue)}`);
+                // rssiCount++;
               }
             }
 
