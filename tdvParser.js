@@ -46,6 +46,15 @@ function parseDateTimeParts(fileNameParts, startIdx, endIdx) {
   return formatDateTimeParts(dateTimeParts);
 }
 
+function processSensorData(filteredData) {
+  if (filteredData.length > 0) {
+    const timestampValues = filteredData.map(row => row[columnTimestamp]);
+    sensorDataFirstTimestamp = timestampValues[0];
+    sensorDataLastTimestamp = timestampValues[timestampValues.length - 1];
+    console.log('timestamp 1:', sensorDataFirstTimestamp);
+    console.log('timestamp 2:', sensorDataLastTimestamp);
+  }
+}
 
 // Read the files in the directory
 fs.readdir(tdvDataExcelFilePath, (err, files) => {
@@ -120,13 +129,7 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
 
         // Extract and print only the timestamp values from the "sensordata" sheet
         if (sheetName === sheetSensorData) {
-          if (filteredData.length > 0) {
-            const timestampValues = filteredData.map(row => row[columnTimestamp]);
-            sensorDataFirstTimestamp = timestampValues[0];
-            sensorDataLastTimestamp = timestampValues[timestampValues.length - 1];
-            console.log('timestamp 1:', sensorDataFirstTimestamp);
-            console.log('timestamp 2:', sensorDataLastTimestamp);
-          }
+          processSensorData(filteredData);
         }
 
         if (sheetName === sheetBLEStats) {
