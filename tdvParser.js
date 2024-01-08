@@ -32,6 +32,8 @@ let sensorDataLastTimestamp;
 let lowerBound;
 let upperBound;
 
+let rssiValues = [];
+
 function formatDateTimeParts(parts) {
   const datePart = parts[0];
   const formattedDate = `${datePart.slice(0, 2)}/${datePart.slice(2, 4)}/${datePart.slice(4)}`;
@@ -56,6 +58,31 @@ function processSensorData(filteredData) {
   }
 }
 
+function processLogInfo(filteredData){
+  rssiValues = filteredData.map(row => parseFloat(row[columnCode0]));
+
+  const minRssi = Math.min(...rssiValues);
+  const maxRssi = Math.max(...rssiValues);
+  const avgRssi = rssiValues.reduce((sum, value) => sum + value, 0) / rssiValues.length;
+  const roundedAvgRssi = avgRssi.toFixed(2);
+
+  const below88Count = rssiValues.filter(value => value < 88).length;
+  const equalOrAbove88Count = rssiValues.filter(value => value >= 88).length;
+  const equalOrAbove95Count = rssiValues.filter(value => value >= 95).length;
+
+  console.log("========================================");
+  console.log("RSSI Values:");
+  console.log(JSON.stringify(rssiValues, null, 2));
+  console.log("Total RSSI Count: ", rssiValues.length);
+  console.log("Num less than 88: ", below88Count);
+  console.log("Num greater than or equal to 88: ", equalOrAbove88Count);
+  console.log("Num greater than or equal to 95: ", equalOrAbove95Count);
+  console.log('Minimum RSSI:', minRssi);
+  console.log('Maximum RSSI:', maxRssi);
+  console.log('Average RSSI:', roundedAvgRssi);
+  console.log("========================================");
+}
+
 // Read the files in the directory
 fs.readdir(tdvDataExcelFilePath, (err, files) => {
   if (err) {
@@ -69,10 +96,8 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
   // Iterate through each Excel file
   excelFiles.forEach(excelFile => {
     const excelFilePath = path.join(tdvDataExcelFilePath, excelFile);
-
     // Extract file name without extension
     const fileNameWithoutExtension = path.parse(excelFile).name;
-
     // Split fileNameWithoutExtension by underscores
     const fileNameParts = fileNameWithoutExtension.split('_');
 
@@ -86,7 +111,6 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
     const privateDataExcel = XLSX.readFile(excelFilePath);
 
     let bleStatsData = [];
-    let rssiValues = [];
     let timestampColumnName;
 
     // Iterate through each sheet
@@ -151,28 +175,7 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
         }
 
         if (sheetName === sheetNameLogInfo) {
-          rssiValues = filteredData.map(row => parseFloat(row[columnCode0]));
-
-          const minRssi = Math.min(...rssiValues);
-          const maxRssi = Math.max(...rssiValues);
-          const avgRssi = rssiValues.reduce((sum, value) => sum + value, 0) / rssiValues.length;
-          const roundedAvgRssi = avgRssi.toFixed(2);
-
-          const below88Count = rssiValues.filter(value => value < 88).length;
-          const equalOrAbove88Count = rssiValues.filter(value => value >= 88).length;
-          const equalOrAbove95Count = rssiValues.filter(value => value >= 95).length;
-
-          console.log("========================================");
-          console.log("RSSI Values:");
-          console.log(JSON.stringify(rssiValues, null, 2));
-          console.log("Total RSSI Count: ", rssiValues.length);
-          console.log("Num less than 88: ", below88Count);
-          console.log("Num greater than or equal to 88: ", equalOrAbove88Count);
-          console.log("Num greater than or equal to 95: ", equalOrAbove95Count);
-          console.log('Minimum RSSI:', minRssi);
-          console.log('Maximum RSSI:', maxRssi);
-          console.log('Average RSSI:', roundedAvgRssi);
-          console.log("========================================");
+          processLogInfo(filteredData);
         }
         else {
           console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
