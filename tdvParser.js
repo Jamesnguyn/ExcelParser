@@ -20,13 +20,6 @@ const columnTimestamp = 'timestamp';
 const columnDisplayTime = 'Display Time';
 const columnCode0 = 'code0';
 
-// Specify the sheet names you want to parse
-const sheetsToParse = [
-  { sheetName: sheetBLEStats, columns: [columnTOC, columnTTC, columnTTD, columnTIC, columnCMP] },
-  { sheetName: sheetSensorData, columns: [columnTimestamp, columnDisplayTime] },
-  { sheetName: sheetNameLogInfo, columns: [columnDisplayTime, columnCode0] }
-];
-
 let sensorDataFirstTimestamp;
 let sensorDataLastTimestamp;
 let lowerBound;
@@ -35,6 +28,13 @@ let upperBound;
 let rssiValues = [];
 let bleStatsData = [];
 let timestampColumnName;
+
+// Specify the sheet names you want to parse
+const sheetsToParse = [
+  { sheetName: sheetBLEStats, columns: [columnTOC, columnTTC, columnTTD, columnTIC, columnCMP] },
+  { sheetName: sheetSensorData, columns: [columnTimestamp, columnDisplayTime] },
+  { sheetName: sheetNameLogInfo, columns: [columnDisplayTime, columnCode0] }
+];
 
 function formatDateTimeParts(parts) {
   const datePart = parts[0];
@@ -287,7 +287,7 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
           processLogInfo(filteredData);
         }
         else {
-          console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
+          // console.log(`Sheet "${sheetName}" not found in file "${excelFile}".`);
         }
       }
     });
