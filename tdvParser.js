@@ -33,6 +33,8 @@ let lowerBound;
 let upperBound;
 
 let rssiValues = [];
+let bleStatsData = [];
+let timestampColumnName;
 
 function formatDateTimeParts(parts) {
   const datePart = parts[0];
@@ -81,6 +83,24 @@ function processLogInfo(filteredData){
   console.log('Maximum RSSI:', maxRssi);
   console.log('Average RSSI:', roundedAvgRssi);
   console.log("========================================");
+}
+
+function processBLEStats(headerRow, sheetData, excelFile) {
+  timestampColumnName = columnTOC; // Change this to the actual column name
+
+  if (!headerRow.includes(timestampColumnName)) {
+    console.error(`Error: "${timestampColumnName}" column not found in sheet "${sheetBLEStats}" in file "${excelFile}".`);
+    return;
+  }
+
+  bleStatsData = sheetData.slice(1).map(row => {
+    const rowData = {};
+    sheetsToParse[0].columns.forEach(col => {
+      const columnIndex = headerRow.indexOf(col);
+      rowData[col] = row[columnIndex];
+    });
+    return rowData;
+  });
 }
 
 function calculateStats(filteredBleStatsData) {
@@ -216,9 +236,6 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
     // Read the Excel file
     const privateDataExcel = XLSX.readFile(excelFilePath);
 
-    let bleStatsData = [];
-    let timestampColumnName;
-
     // Iterate through each sheet
     sheetsToParse.forEach(sheetInfo => {
       const { sheetName, columns } = sheetInfo;
@@ -263,21 +280,7 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
         }
 
         if (sheetName === sheetBLEStats) {
-          // Check if the "timestamp" column is present
-          timestampColumnName = columnTOC; // Change this to the actual column name
-          if (!headerRow.includes(timestampColumnName)) {
-            console.error(`Error: "${timestampColumnName}" column not found in sheet "${sheetName}" in file "${excelFile}".`);
-            return;
-          }
-
-          bleStatsData = sheetData.slice(1).map(row => {
-            const rowData = {};
-            columns.forEach(col => {
-              const columnIndex = headerRow.indexOf(col);
-              rowData[col] = row[columnIndex];
-            });
-            return rowData;
-          });
+          processBLEStats(headerRow, sheetData, excelFile);
         }
 
         if (sheetName === sheetNameLogInfo) {
