@@ -60,7 +60,7 @@ function processSensorData(filteredData) {
   }
 }
 
-function processLogInfo(filteredData){
+function processLogInfo(filteredData) {
   rssiValues = filteredData.map(row => parseFloat(row[columnCode0]));
 
   const minRssi = Math.min(...rssiValues);
@@ -105,108 +105,108 @@ function processBLEStats(headerRow, sheetData, excelFile) {
 
 function calculateStats(filteredBleStatsData) {
   // =================TTC=============================
-    // Extract "ttc" values from the filtered BLE Stats data
-    const ttcValues = filteredBleStatsData.map(row => parseFloat(row[columnTTC]));
+  // Extract "ttc" values from the filtered BLE Stats data
+  const ttcValues = filteredBleStatsData.map(row => parseFloat(row[columnTTC]));
 
-    // Calculate minimum, maximum, and average values
-    const minTTC = Math.min(...ttcValues);
-    const maxTTC = Math.max(...ttcValues);
-    const avgTTC = ttcValues.reduce((sum, value) => sum + value, 0) / ttcValues.length;
+  // Calculate minimum, maximum, and average values
+  const minTTC = Math.min(...ttcValues);
+  const maxTTC = Math.max(...ttcValues);
+  const avgTTC = ttcValues.reduce((sum, value) => sum + value, 0) / ttcValues.length;
 
-    // Round average to two decimal points
-    const roundedAvgTTC = avgTTC.toFixed(2);
+  // Round average to two decimal points
+  const roundedAvgTTC = avgTTC.toFixed(2);
 
-    // Calculate Standard Deviation
-    // Calculate the sum of squared differences from the average
-    const ttcSumSquaredDifferences = ttcValues.reduce((sum, value) => sum + Math.pow(value - avgTTC, 2), 0);
-    // Calculate the variance
-    const ttcVariance = ttcSumSquaredDifferences / ttcValues.length;
-    // Calculate the standard deviation
-    const ttcStdDeviation = Math.sqrt(ttcVariance);
-    // Round standard deviation to two decimal points
-    const ttcRoundedStdDeviation = ttcStdDeviation.toFixed(2);
+  // Calculate Standard Deviation
+  // Calculate the sum of squared differences from the average
+  const ttcSumSquaredDifferences = ttcValues.reduce((sum, value) => sum + Math.pow(value - avgTTC, 2), 0);
+  // Calculate the variance
+  const ttcVariance = ttcSumSquaredDifferences / ttcValues.length;
+  // Calculate the standard deviation
+  const ttcStdDeviation = Math.sqrt(ttcVariance);
+  // Round standard deviation to two decimal points
+  const ttcRoundedStdDeviation = ttcStdDeviation.toFixed(2);
 
-    // =================TTD=============================
-    // Extract "ttd" values from the filtered BLE Stats data
-    const ttdValues = filteredBleStatsData.map(row => parseFloat(row[columnTTD]));
+  // =================TTD=============================
+  // Extract "ttd" values from the filtered BLE Stats data
+  const ttdValues = filteredBleStatsData.map(row => parseFloat(row[columnTTD]));
 
-    // Calculate minimum, maximum, and average values
-    const minTTD = Math.min(...ttdValues);
-    const maxTTD = Math.max(...ttdValues);
-    const avgTTD = ttdValues.reduce((sum, value) => sum + value, 0) / ttdValues.length;
+  // Calculate minimum, maximum, and average values
+  const minTTD = Math.min(...ttdValues);
+  const maxTTD = Math.max(...ttdValues);
+  const avgTTD = ttdValues.reduce((sum, value) => sum + value, 0) / ttdValues.length;
 
-    // Round average to two decimal points
-    const roundedAvgTTD = avgTTD.toFixed(2);
+  // Round average to two decimal points
+  const roundedAvgTTD = avgTTD.toFixed(2);
 
-    // Calculate Standard Deviation
-    // Calculate the sum of squared differences from the average
-    const ttdSumSquaredDifferences = ttdValues.reduce((sum, value) => sum + Math.pow(value - avgTTD, 2), 0);
-    // Calculate the variance
-    const ttdVariance = ttdSumSquaredDifferences / ttdValues.length;
-    // Calculate the standard deviation
-    const ttdStdDeviation = Math.sqrt(ttdVariance);
-    // Round standard deviation to two decimal points
-    const ttdRoundedStdDeviation = ttdStdDeviation.toFixed(2);
+  // Calculate Standard Deviation
+  // Calculate the sum of squared differences from the average
+  const ttdSumSquaredDifferences = ttdValues.reduce((sum, value) => sum + Math.pow(value - avgTTD, 2), 0);
+  // Calculate the variance
+  const ttdVariance = ttdSumSquaredDifferences / ttdValues.length;
+  // Calculate the standard deviation
+  const ttdStdDeviation = Math.sqrt(ttdVariance);
+  // Round standard deviation to two decimal points
+  const ttdRoundedStdDeviation = ttdStdDeviation.toFixed(2);
 
-    // =================TIC=============================
-    // Extract "ttc" values from the filtered BLE Stats data
-    const ticValues = filteredBleStatsData.map(row => parseFloat(row[columnTIC]));
+  // =================TIC=============================
+  // Extract "ttc" values from the filtered BLE Stats data
+  const ticValues = filteredBleStatsData.map(row => parseFloat(row[columnTIC]));
 
-    // Calculate minimum, maximum, and average values
-    const minTIC = Math.min(...ticValues);
-    const maxTIC = Math.max(...ticValues);
-    const avgTIC = ticValues.reduce((sum, value) => sum + value, 0) / ticValues.length;
+  // Calculate minimum, maximum, and average values
+  const minTIC = Math.min(...ticValues);
+  const maxTIC = Math.max(...ticValues);
+  const avgTIC = ticValues.reduce((sum, value) => sum + value, 0) / ticValues.length;
 
-    // Round average to two decimal points
-    const roundedAvgTIC = avgTIC.toFixed(2);
+  // Round average to two decimal points
+  const roundedAvgTIC = avgTIC.toFixed(2);
 
-    // Calculate Standard Deviation
-    // Calculate the sum of squared differences from the average
-    const ticSumSquaredDifferences = ticValues.reduce((sum, value) => sum + Math.pow(value - avgTIC, 2), 0);
-    // Calculate the variance
-    const ticVariance = ticSumSquaredDifferences / ticValues.length;
-    // Calculate the standard deviation
-    const ticStdDeviation = Math.sqrt(ticVariance);
-    // Round standard deviation to two decimal points
-    const ticRoundedStdDeviation = ticStdDeviation.toFixed(2);
+  // Calculate Standard Deviation
+  // Calculate the sum of squared differences from the average
+  const ticSumSquaredDifferences = ticValues.reduce((sum, value) => sum + Math.pow(value - avgTIC, 2), 0);
+  // Calculate the variance
+  const ticVariance = ticSumSquaredDifferences / ticValues.length;
+  // Calculate the standard deviation
+  const ticStdDeviation = Math.sqrt(ticVariance);
+  // Round standard deviation to two decimal points
+  const ticRoundedStdDeviation = ticStdDeviation.toFixed(2);
 
-    // =================CMP=============================
-    const cmpValues = filteredBleStatsData.map(row => parseFloat(row[columnCMP]));
+  // =================CMP=============================
+  const cmpValues = filteredBleStatsData.map(row => parseFloat(row[columnCMP]));
 
-    // Calculate sum value
-    const sumCMP = cmpValues.reduce((sum, value) => sum + value, 0);
+  // Calculate sum value
+  const sumCMP = cmpValues.reduce((sum, value) => sum + value, 0);
 
-    // console.log('Filtered BLE Data', filteredBleStatsData);
-    // console.log('Filtered BLE Data Length', filteredBleStatsData.length + 1);
+  // console.log('Filtered BLE Data', filteredBleStatsData);
+  // console.log('Filtered BLE Data Length', filteredBleStatsData.length + 1);
 
-    console.log('Time to Connect:');
-    console.log('Minimum TTC:', minTTC);
-    console.log('Maximum TTC:', maxTTC);
-    console.log('Average TTC:', roundedAvgTTC);
-    console.log('STD TTC:', ttcRoundedStdDeviation);
+  console.log('Time to Connect:');
+  console.log('Minimum TTC:', minTTC);
+  console.log('Maximum TTC:', maxTTC);
+  console.log('Average TTC:', roundedAvgTTC);
+  console.log('STD TTC:', ttcRoundedStdDeviation);
 
-    console.log("========================================");
+  console.log("========================================");
 
-    console.log('Time to Disconnect:');
-    console.log('Minimum TTD:', minTTD);
-    console.log('Maximum TTD:', maxTTD);
-    console.log('Average TTD:', roundedAvgTTD);
-    console.log('STD TTD:', ttdRoundedStdDeviation);
+  console.log('Time to Disconnect:');
+  console.log('Minimum TTD:', minTTD);
+  console.log('Maximum TTD:', maxTTD);
+  console.log('Average TTD:', roundedAvgTTD);
+  console.log('STD TTD:', ttdRoundedStdDeviation);
 
-    console.log("========================================");
+  console.log("========================================");
 
-    console.log('Time in Connection:');
-    console.log('Minimum TIC:', minTIC);
-    console.log('Maximum TIC:', maxTIC);
-    console.log('Average TIC:', roundedAvgTIC);
-    console.log('STD TIC:', ticRoundedStdDeviation);
+  console.log('Time in Connection:');
+  console.log('Minimum TIC:', minTIC);
+  console.log('Maximum TIC:', maxTIC);
+  console.log('Average TIC:', roundedAvgTIC);
+  console.log('STD TIC:', ticRoundedStdDeviation);
 
-    console.log("========================================");
+  console.log("========================================");
 
-    console.log('EGV Capture:');
-    console.log('Sum CMP:', sumCMP);
+  console.log('EGV Capture:');
+  console.log('Sum CMP:', sumCMP);
 
-    console.log("========================================");
+  console.log("========================================");
 }
 
 // Read the files in the directory
@@ -232,7 +232,7 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
     console.log("lowerBound", lowerBound);
     upperBound = parseDateTimeParts(fileNameParts, 2);
     console.log("upperBound", upperBound);
-    
+
     // Read the Excel file
     const privateDataExcel = XLSX.readFile(excelFilePath);
 
