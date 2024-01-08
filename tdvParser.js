@@ -32,6 +32,21 @@ let sensorDataLastTimestamp;
 let lowerBound;
 let upperBound;
 
+function formatDateTimeParts(parts) {
+  const datePart = parts[0];
+  const formattedDate = `${datePart.slice(0, 2)}/${datePart.slice(2, 4)}/${datePart.slice(4)}`;
+  const timePart = parts[1];
+  const formattedTime = `${timePart.slice(0, 2)}:${timePart.slice(2)}:00`;
+  return formattedDate.concat(".", formattedTime);
+}
+
+function parseDateTimeParts(fileNameParts, startIdx, endIdx) {
+  const part = fileNameParts.slice(startIdx, endIdx).join('.');
+  const dateTimeParts = part.split(".");
+  return formatDateTimeParts(dateTimeParts);
+}
+
+
 // Read the files in the directory
 fs.readdir(tdvDataExcelFilePath, (err, files) => {
   if (err) {
@@ -52,26 +67,12 @@ fs.readdir(tdvDataExcelFilePath, (err, files) => {
     // Split fileNameWithoutExtension by underscores
     const fileNameParts = fileNameWithoutExtension.split('_');
 
-    // find lower bound date and time
-    const firstPart = fileNameParts.slice(0, 2).join('.');
-    const firstDateAndTime = firstPart.split(".");
-    const firstDatePart = firstDateAndTime[0];
-    const firstFormattedDate = `${firstDatePart.slice(0, 2)}/${firstDatePart.slice(2, 4)}/${firstDatePart.slice(4)}`;
-    const firstTimePart = firstDateAndTime[1];
-    const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
-    lowerBound = firstFormattedDate.concat(".", firstFormattedTime);
-    // console.log(lowerBound);
-
-    // find upper bound date and time
-    const secondPart = fileNameParts.slice(2).join('.');
-    const secondDateAndTime = secondPart.split(".");
-    const secondDatePart = secondDateAndTime[0];
-    const secondFormattedDate = `${secondDatePart.slice(0, 2)}/${secondDatePart.slice(2, 4)}/${secondDatePart.slice(4)}`;
-    const secondTimePart = secondDateAndTime[1];
-    const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
-    upperBound = secondFormattedDate.concat(".", secondFormattedTime);
-    // console.log(upperBound);
-
+    // Find Lower and Upper Bounds
+    lowerBound = parseDateTimeParts(fileNameParts, 0, 2);
+    console.log("lowerBound", lowerBound);
+    upperBound = parseDateTimeParts(fileNameParts, 2);
+    console.log("upperBound", upperBound);
+    
     // Read the Excel file
     const privateDataExcel = XLSX.readFile(excelFilePath);
 
