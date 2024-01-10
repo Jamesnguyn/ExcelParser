@@ -19,6 +19,9 @@ const columnCMP = 'cmp';
 const columnTimestamp = 'timestamp';
 const columnDisplayTime = 'Display Time';
 const columnCode0 = 'code0';
+const columnType = 'type';
+
+const columnData = 'developer';
 
 let sensorDataFirstTimestamp;
 let sensorDataLastTimestamp;
