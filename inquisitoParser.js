@@ -28,6 +28,59 @@ const sheetsToParse = [
   { sheetName: sheetPhoneErrorLog, columns: [columnMessage, columnRecordedDisplayTime] }
 ];
 
+function formatDateTimeParts(parts){
+  const dateAndTime = parts.split(".");
+  const datePart = dateAndTime[0];
+  const formattedDate = `${datePart.slice(4)}-${datePart.slice(0, 2)}-${datePart.slice(2, 4)}`;
+  const timePart = dateAndTime[1];
+  const formattedTime = `${timePart.slice(0, 2)}:${timePart.slice(2)}:00`;
+  const formattedDateTime = new Date(`${formattedDate} ${formattedTime}`).toISOString();
+
+  return formattedDateTime;
+}
+
+function processUserActivitySheet(userActivitySheet, lowerBound, upperBound){
+  const userActivityData = XLSX.utils.sheet_to_json(userActivitySheet, { header: 1 });
+
+  const headerRowUserActivity = userActivityData[0];
+  const columnIndexRecordedDisplayTime = headerRowUserActivity ? headerRowUserActivity.indexOf(columnRecordedDisplayTime) : -1;
+  const columnIndexData = headerRowUserActivity ? headerRowUserActivity.indexOf(columnData) : -1;
+
+  if (columnIndexRecordedDisplayTime !== -1 && columnIndexData !== -1) {
+    dataRssiValues = userActivityData.slice(1)
+      .filter(row => {
+        const rowRecordedDisplayTime = row[columnIndexRecordedDisplayTime];
+        const rowData = row[columnIndexData];
+
+        if (rowData === undefined) {
+          console.log(`Undefined value in columnData for Recorded Display Time ${rowRecordedDisplayTime}`);
+          return false;
+        }
+
+        const utcRecordedDisplayTime = new Date(rowRecordedDisplayTime).toISOString();
+
+        return (
+          utcRecordedDisplayTime >= lowerBound &&
+          utcRecordedDisplayTime <= upperBound &&
+          rowData && rowData.includes(dataRssi)
+        );
+      })
+      .map(row => {
+        try {
+          const jsonData = JSON.parse(row[columnIndexData]);
+          return jsonData?.['Rssi'];
+        } catch (error) {
+          console.error(`Error parsing JSON in row with Recorded Display Time ${row[columnIndexRecordedDisplayTime]}`);
+          return null;
+        }
+      })
+      .filter(value => value !== null && value !== undefined);
+  } else {
+    console.log(`Column ${columnRecordedDisplayTime} or ${columnData} not found in sheetPhoneUserActivity`);
+  }
+  rssiCount++;
+}
+
 // Read files in Directory
 fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
   if (err) {
@@ -44,31 +97,19 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     dataRssiValues = [];
 
     const excelFilePath = path.join(inquisitoDataExcelFilePath, excelFile);
-
     // Extract file name without extension
     const fileNameWithoutExtension = path.parse(excelFile).name;
-
     // Split filewithoutExension by underscores
     const fileNameParts = fileNameWithoutExtension.split('_');
 
     // find lower bound date and time
     const firstPart = fileNameParts.slice(0, 2).join('.');
-    const firstDateAndTime = firstPart.split(".");
-    const firstDatePart = firstDateAndTime[0];
-    const firstFormattedDate = `${firstDatePart.slice(4)}-${firstDatePart.slice(0, 2)}-${firstDatePart.slice(2, 4)}`;
-    const firstTimePart = firstDateAndTime[1];
-    const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
-    lowerBound = new Date(`${firstFormattedDate} ${firstFormattedTime}`).toISOString();
+    lowerBound = formatDateTimeParts(firstPart);
     console.log('Lower bound UTC: ', lowerBound);
 
     // find upper bound date and time
     const secondPart = fileNameParts.slice(2).join('.');
-    const secondDateAndTime = secondPart.split(".");
-    const secondDatePart = secondDateAndTime[0];
-    const secondFormattedDate = `${secondDatePart.slice(4)}-${secondDatePart.slice(0, 2)}-${secondDatePart.slice(2, 4)}`;
-    const secondTimePart = secondDateAndTime[1];
-    const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
-    upperBound = new Date(`${secondFormattedDate} ${secondFormattedTime}`).toISOString();
+    upperBound = formatDateTimeParts(secondPart);
     console.log('Upper bound UTC: ', upperBound);
     console.log('=============================================');
 
@@ -142,49 +183,7 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
               // If "onReadRssi" is not present, navigate to "sheetPhoneUserActivity" file
               const userActivitySheet = inquisitoDataExcel.Sheets[sheetPhoneUserActivity];
               if (userActivitySheet) {
-                const userActivityData = XLSX.utils.sheet_to_json(userActivitySheet, { header: 1 });
-
-                // Find column indices in the header row
-                const headerRowUserActivity = userActivityData[0];
-                const columnIndexRecordedDisplayTime = headerRowUserActivity ? headerRowUserActivity.indexOf(columnRecordedDisplayTime) : -1;
-                const columnIndexData = headerRowUserActivity ? headerRowUserActivity.indexOf(columnData) : -1;
-
-                if (columnIndexRecordedDisplayTime !== -1 && columnIndexData !== -1) {
-                  // Extract values from the "columnData" column associated with "columnRecordedDisplayTime" that include "dataRssi"
-                  dataRssiValues = userActivityData.slice(1)
-                    .filter(row => {
-                      const rowRecordedDisplayTime = row[columnIndexRecordedDisplayTime];
-                      const rowData = row[columnIndexData];
-                      if (rowData === undefined) {
-                        console.log(`Undefined value in columnData for Recorded Display Time ${rowRecordedDisplayTime}`);
-                        return false;
-                      }
-
-                      // Convert recorded display time to UTC
-                      const utcRecordedDisplayTime = new Date(rowRecordedDisplayTime).toISOString();
-
-                      return (
-                        utcRecordedDisplayTime >= lowerBound &&
-                        utcRecordedDisplayTime <= upperBound &&
-                        rowData && rowData.includes(dataRssi)
-                      );
-                    })
-                    .map(row => {
-                      try {
-                        const jsonData = JSON.parse(row[columnIndexData]);
-                        return jsonData?.['Rssi'];
-                      } catch (error) {
-                        console.error(`Error parsing JSON in row with Recorded Display Time ${row[columnIndexRecordedDisplayTime]}`);
-                        return null; // or handle it according to your needs
-                      }
-                    })
-                    .filter(value => value !== null && value !== undefined); // Remove null and undefined values
-                  
-                }
-                else {
-                  console.log(`Column ${columnRecordedDisplayTime} or ${columnData} not found in sheetPhoneUserActivity`);
-                }
-                rssiCount++;
+                processUserActivitySheet(userActivitySheet, lowerBound, upperBound);
               }
               else {
                 console.log(`Sheet ${sheetPhoneUserActivity} not found in the file`);
