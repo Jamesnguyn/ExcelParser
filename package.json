@@ -1,10 +1,14 @@
 {
+  "main": "auto-inquisito.js",
   "dependencies": {
+    "pac-proxy-agent": "^7.0.1",
+    "puppeteer": "^21.7.0",
     "xlsx": "^0.18.5"
   },
   "scripts": {
     "build": "node tdvParser.js & node inquisitoParser.js",
     "tdv": "node tdvParser.js",
-    "inq": "node inquisitoParser.js"
+    "inq": "node inquisitoParser.js",
+    "auto-inq": "node auto-inquisito.js"
   }
 }
