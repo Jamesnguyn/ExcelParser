@@ -28,6 +28,17 @@ const sheetsToParse = [
   { sheetName: sheetPhoneErrorLog, columns: [columnMessage, columnRecordedDisplayTime] }
 ];
 
+function formatDateTimeParts(parts){
+  const dateAndTime = parts.split(".");
+  const datePart = dateAndTime[0];
+  const formattedDate = `${datePart.slice(4)}-${datePart.slice(0, 2)}-${datePart.slice(2, 4)}`;
+  const timePart = dateAndTime[1];
+  const formattedTime = `${timePart.slice(0, 2)}:${timePart.slice(2)}:00`;
+  const formattedDateTime = new Date(`${formattedDate} ${formattedTime}`).toISOString();
+
+  return formattedDateTime;
+}
+
 // Read files in Directory
 fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
   if (err) {
@@ -44,31 +55,19 @@ fs.readdir(inquisitoDataExcelFilePath, (err, files) => {
     dataRssiValues = [];
 
     const excelFilePath = path.join(inquisitoDataExcelFilePath, excelFile);
-
     // Extract file name without extension
     const fileNameWithoutExtension = path.parse(excelFile).name;
-
     // Split filewithoutExension by underscores
     const fileNameParts = fileNameWithoutExtension.split('_');
 
     // find lower bound date and time
     const firstPart = fileNameParts.slice(0, 2).join('.');
-    const firstDateAndTime = firstPart.split(".");
-    const firstDatePart = firstDateAndTime[0];
-    const firstFormattedDate = `${firstDatePart.slice(4)}-${firstDatePart.slice(0, 2)}-${firstDatePart.slice(2, 4)}`;
-    const firstTimePart = firstDateAndTime[1];
-    const firstFormattedTime = `${firstTimePart.slice(0, 2)}:${firstTimePart.slice(2)}:00`;
-    lowerBound = new Date(`${firstFormattedDate} ${firstFormattedTime}`).toISOString();
+    lowerBound = formatDateTimeParts(firstPart);
     console.log('Lower bound UTC: ', lowerBound);
 
     // find upper bound date and time
     const secondPart = fileNameParts.slice(2).join('.');
-    const secondDateAndTime = secondPart.split(".");
-    const secondDatePart = secondDateAndTime[0];
-    const secondFormattedDate = `${secondDatePart.slice(4)}-${secondDatePart.slice(0, 2)}-${secondDatePart.slice(2, 4)}`;
-    const secondTimePart = secondDateAndTime[1];
-    const secondFormattedTime = `${secondTimePart.slice(0, 2)}:${secondTimePart.slice(2)}:00`;
-    upperBound = new Date(`${secondFormattedDate} ${secondFormattedTime}`).toISOString();
+    upperBound = formatDateTimeParts(secondPart);
     console.log('Upper bound UTC: ', upperBound);
     console.log('=============================================');
 
